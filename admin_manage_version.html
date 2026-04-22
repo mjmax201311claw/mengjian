@@ -1,0 +1,3237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>孟家点餐系统 - 管理员版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        
+        /* 管理员登录栏 */
+        .admin-bar {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        
+        .admin-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .admin-icon {
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .admin-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .admin-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .admin-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .admin-btn.primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border: none;
+        }
+        
+        .admin-btn.primary:hover {
+            background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+        
+        .admin-btn.danger {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            border: none;
+        }
+        
+        .admin-btn.danger:hover {
+            background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        
+        .admin-login-section {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #2a5298;
+            display: none;
+        }
+        
+        .admin-login-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .login-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+            align-items: end;
+        }
+        
+        .login-form input {
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            background: white;
+        }
+        
+        .login-form input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
+        }
+        
+        .login-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .login-btn:hover {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+        }
+        
+        .admin-control-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .admin-control-panel.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .admin-tab {
+            padding: 12px 25px;
+            white-space: nowrap;
+            cursor: pointer;
+            background: #f0f0f0;
+            border-radius: 10px 10px 0 0;
+            margin-right: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .admin-tab:hover {
+            background: #e0e0e0;
+        }
+        
+        .admin-tab.active {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            box-shadow: 0 -2px 10px rgba(42, 82, 152, 0.2);
+        }
+        
+        .admin-panel-content {
+            min-height: 200px;
+        }
+        
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .dish-list-admin {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .dish-item-admin {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            align-items: center;
+        }
+        
+        .dish-item-admin input {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        
+        .dish-item-admin input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        
+        .dish-item-admin .dish-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .user-list-admin {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .user-item-admin {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+        
+        .user-item-admin:hover {
+            border-color: #2a5298;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(42, 82, 152, 0.1);
+        }
+        
+        .user-item-admin input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        
+        .user-item-admin input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        
+        .system-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .setting-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid #2a5298;
+        }
+        
+        .setting-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2a5298;
+            font-size: 18px;
+        }
+        
+        .setting-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .setting-option:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-value {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+        
+        .setting-input {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            width: 150px;
+        }
+        
+        .setting-input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .header .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        .dish-count-badge {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .price-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+            display: inline-block;
+        }
+        
+        .system-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .user-select {
+            margin-bottom: 20px;
+        }
+        
+        .user-select select {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            background: #f8f9fa;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .user-select select:hover {
+            border-color: #ff6b6b;
+            background: #fff;
+        }
+        
+        .custom-dish-section {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 5px solid #ff6b6b;
+        }
+        
+        .custom-dish-title {
+            font-size: 20px;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .custom-dish-title:before {
+            content: '🔥';
+            font-size: 24px;
+        }
+        
+        .custom-dish-inputs {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .custom-dish-inputs input {
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            background: white;
+        }
+        
+        .custom-dish-inputs input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+        }
+        
+        .add-custom-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .add-custom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+        }
+        
+        .custom-dish-management {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 107, 107, 0.2);
+        }
+        
+        .custom-dish-count {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .custom-dish-count strong {
+            color: #ff6b6b;
+            font-size: 16px;
+        }
+        
+        .manage-custom-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .manage-custom-btn:hover {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+        
+        .search-box {
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+            background: white;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        
+        .nav-tab {
+            padding: 12px 25px;
+            white-space: nowrap;
+            cursor: pointer;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-right: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .nav-tab:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .dishes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .dish-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dish-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #ff6b6b;
+        }
+        
+        .dish-card.selected {
+            border-color: #ff6b6b;
+            background: linear-gradient(to bottom right, #fff8f8, #ffffff);
+        }
+        
+        .dish-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+            font-size: 18px;
+            padding-right: 35px;
+        }
+        
+        .dish-price {
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .dish-category {
+            font-size: 13px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .dish-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-top: 10px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .qty-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qty-btn:hover {
+            background: #ee5a24;
+            transform: scale(1.1);
+        }
+        
+        .qty-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff6b6b;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .order-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .order-section h3 {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #ff6b6b;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .order-section h3:before {
+            content: '📋';
+            font-size: 20px;
+        }
+        
+        .order-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .order-item:hover {
+            background: #fff8f8;
+            transform: translateX(5px);
+        }
+        
+        .dish-info {
+            flex-grow: 1;
+        }
+        
+        .dish-name-small {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .dish-price-small {
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .order-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .qty-small {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff6b6b;
+            min-width: 25px;
+            text-align: center;
+        }
+        
+        .action-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 14px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 160px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .confirm-order {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+        
+        .confirm-order:hover {
+            background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
+        }
+        
+        .view-history {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .view-history:hover {
+            background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+        }
+        
+        .clear-orders {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+        }
+        
+        .clear-orders:hover {
+            background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%);
+        }
+        
+        .orders-history {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 25px;
+            display: none;
+        }
+        
+        .orders-history.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .orders-list {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #ff6b6b;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .delete-order-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+        
+        .delete-order-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%);
+        }
+        
+        .order-actions-bottom {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+            gap: 10px;
+        }
+        
+        .delete-btn {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .order-user {
+            font-weight: bold;
+            color: #ff6b6b;
+            font-size: 18px;
+        }
+        
+        .order-time {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .order-dishes {
+            margin-top: 15px;
+        }
+        
+        .order-dish-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .order-dish-name {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .order-dish-qty {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+        }
+        
+        .no-orders {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+            font-size: 18px;
+        }
+        
+        .total-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 22px;
+            color: #ff6b6b;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 18px 35px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.4);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.5s ease-out;
+            max-width: 400px;
+            font-weight: 500;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .close-history {
+            float: right;
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .close-history:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%);
+        }
+        
+        .custom-dish-tag {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .custom-dish-delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .dish-card:hover .custom-dish-delete-btn {
+            opacity: 1;
+        }
+        
+        .custom-dish-delete-btn:hover {
+            background: #dc3545;
+            transform: scale(1.2);
+        }
+        
+        /* 自定义菜品管理对话框 */
+        .custom-dish-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 2000;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .custom-dish-dialog.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999;
+            display: none;
+        }
+        
+        .dialog-overlay.show {
+            display: block;
+        }
+        
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .dialog-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2a5298;
+        }
+        
+        .dialog-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .dialog-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .custom-dish-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .custom-dish-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+        }
+        
+        .custom-dish-info {
+            flex-grow: 1;
+        }
+        
+        .custom-dish-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .custom-dish-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .dialog-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .admin-bar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .admin-buttons {
+                justify-content: center;
+            }
+            
+            .login-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .custom-dish-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-btn {
+                min-width: 140px;
+                padding: 12px 20px;
+            }
+            
+            .dishes-container {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+            
+            .dish-item-admin {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            
+            .dish-item-admin .dish-actions {
+                justify-content: flex-end;
+                margin-top: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .dishes-container {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+            }
+            
+            .dish-card {
+                padding: 15px;
+            }
+            
+            .nav-tab, .admin-tab {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .admin-control-panel {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 管理员登录栏 -->
+    <div class="admin-bar">
+        <div class="admin-status">
+            <span class="admin-icon">🔒</span>
+            <span id="admin-status-text">未登录管理员</span>
+        </div>
+        <div class="admin-buttons">
+            <button class="admin-btn" id="show-login">👤 管理员登录</button>
+            <button class="admin-btn primary" id="show-admin-panel" style="display: none;">⚙️ 管理面板</button>
+            <button class="admin-btn danger" id="logout-admin" style="display: none;">🚪 退出登录</button>
+        </div>
+    </div>
+    
+    <!-- 管理员登录表单 -->
+    <div class="admin-login-section" id="admin-login-section">
+        <div class="login-form">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">用户名</label>
+                <input type="text" id="admin-username" placeholder="输入管理员用户名">
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">密码</label>
+                <input type="password" id="admin-password" placeholder="输入管理员密码">
+            </div>
+            <div>
+                <button class="login-btn" id="admin-login-btn">🔑 登录</button>
+            </div>
+        </div>
+        <div style="margin-top: 10px; font-size: 14px; color: #666;">
+            管理员账号：<strong>mengjian</strong> | 密码：<strong>mj123456</strong>
+        </div>
+    </div>
+    
+    <!-- 管理员控制面板 -->
+    <div class="admin-control-panel" id="admin-control-panel">
+        <div class="admin-tabs">
+            <div class="admin-tab active" data-tab="dishes">🍲 菜品管理</div>
+            <div class="admin-tab" data-tab="users">👥 用户管理</div>
+            <div class="admin-tab" data-tab="settings">⚙️ 系统设置</div>
+            <div class="admin-tab" data-tab="custom">🔥 自定义菜品</div>
+        </div>
+        
+        <div class="admin-panel-content">
+            <!-- 菜品管理 -->
+            <div class="admin-section active" id="dishes-section">
+                <h3>菜品管理</h3>
+                <p style="color: #666; margin-bottom: 15px;">管理所有菜品信息（名称、价格、分类、描述）</p>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="search-dish" placeholder="🔍 搜索菜品..." style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                    <button class="admin-btn primary" id="add-new-dish">+ 添加新菜品</button>
+                    <button class="admin-btn" id="save-dish-changes">💾 保存所有修改</button>
+                </div>
+                
+                <div class="dish-list-admin" id="dish-list-admin">
+                    <!-- 菜品将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            
+            <!-- 用户管理 -->
+            <div class="admin-section" id="users-section">
+                <h3>用户管理</h3>
+                <p style="color: #666; margin-bottom: 15px;">管理用餐人员名单</p>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="new-user-name" placeholder="输入新用户姓名" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                    <button class="admin-btn primary" id="add-new-user">+ 添加新用户</button>
+                    <button class="admin-btn" id="save-user-changes">💾 保存用户列表</button>
+                </div>
+                
+                <div class="user-list-admin" id="user-list-admin">
+                    <!-- 用户将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            
+            <!-- 系统设置 -->
+            <div class="admin-section" id="settings-section">
+                <h3>系统设置</h3>
+                <p style="color: #666; margin-bottom: 15px;">配置系统全局设置</p>
+                
+                <div class="system-settings">
+                    <div class="setting-card">
+                        <div class="setting-title">💰 价格设置</div>
+                        <div class="setting-option">
+                            <span>默认菜品价格</span>
+                            <input type="number" id="default-price" value="1" min="0" step="0.01" class="setting-input">
+                        </div>
+                        <div class="setting-option">
+                            <span>价格单位</span>
+                            <select id="price-unit" class="setting-input">
+                                <option value="¥">¥ (人民币)</option>
+                                <option value="$">$ (美元)</option>
+                                <option value="€">€ (欧元)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-card">
+                        <div class="setting-title">🎨 界面设置</div>
+                        <div class="setting-option">
+                            <span>每页显示菜品数</span>
+                            <input type="number" id="dishes-per-page" value="20" min="10" max="100" class="setting-input">
+                        </div>
+                        <div class="setting-option">
+                            <span>显示菜品描述</span>
+                            <input type="checkbox" id="show-descriptions" checked>
+                        </div>
+                        <div class="setting-option">
+                            <span>显示菜品图片</span>
+                            <input type="checkbox" id="show-images">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-card">
+                        <div class="setting-title">📊 数据管理</div>
+                        <div class="setting-option">
+                            <span>自动保存间隔</span>
+                            <select id="auto-save-interval" class="setting-input">
+                                <option value="1">1分钟</option>
+                                <option value="5" selected>5分钟</option>
+                                <option value="10">10分钟</option>
+                                <option value="30">30分钟</option>
+                            </select>
+                        </div>
+                        <div class="setting-option">
+                            <span>保留历史订单天数</span>
+                            <input type="number" id="keep-orders-days" value="30" min="1" max="365" class="setting-input">
+                        </div>
+                        <div class="setting-option">
+                            <span style="color: #dc3545;">清空所有数据</span>
+                            <button class="admin-btn danger" id="reset-all-data" style="padding: 5px 10px; font-size: 12px;">⚠️ 重置</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="admin-btn primary" id="save-settings" style="padding: 12px 30px; font-size: 16px;">💾 保存全部设置</button>
+                </div>
+            </div>
+            
+            <!-- 自定义菜品管理 -->
+            <div class="admin-section" id="custom-section">
+                <h3>自定义菜品管理</h3>
+                <p style="color: #666; margin-bottom: 15px;">管理用户添加的自定义菜品</p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div class="custom-dish-count">
+                        当前有 <strong id="admin-custom-count">0</strong> 道自定义菜品
+                    </div>
+                    <div class="admin-buttons">
+                        <button class="admin-btn danger" id="delete-all-custom">🗑️ 删除所有自定义菜品</button>
+                    </div>
+                </div>
+                
+                <div class="dish-list-admin" id="custom-dish-list-admin">
+                    <!-- 自定义菜品将通过JavaScript动态加载 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="header">
+        <div class="system-status">🔥 管理员版 · 完整功能</div>
+        <h1>孟家点餐系统</h1>
+        <div class="subtitle">🔒 管理员权限控制 · 🔥 自定义菜品管理 · 🎯 完整管理功能</div>
+        <div class="dish-count-badge">63道菜品 + 自定义菜品</div>
+        <div class="price-badge">所有菜品 ¥1/份</div>
+    </div>
+    
+    <div class="controls">
+        <div class="user-select">
+            <select id="user-select">
+                <option value="">选择用餐人员</option>
+                <!-- 用户列表将通过JavaScript动态加载 -->
+            </select>
+        </div>
+        
+        <div class="custom-dish-section">
+            <div class="custom-dish-title">🔥 你点我烧</div>
+            <div class="custom-dish-inputs">
+                <input type="text" id="custom-dish-name" placeholder="输入你想吃的菜名（例如：红烧牛肉）">
+                <button class="add-custom-btn" id="add-custom-dish">+ 添加自定义菜品</button>
+            </div>
+            
+            <div class="custom-dish-management">
+                <div class="custom-dish-count">
+                    自定义菜品：<strong id="custom-count">0</strong> 道
+                </div>
+                <button class="manage-custom-btn" id="manage-custom-dishes">
+                    🔧 管理自定义菜品
+                </button>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="dish-search" placeholder="🔍 搜索菜品名称...">
+        </div>
+        
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-category="all">全部菜品</div>
+            <div class="nav-tab" data-category="蔬菜">🥬 蔬菜</div>
+            <div class="nav-tab" data-category="荤菜">🥩 荤菜</div>
+            <div class="nav-tab" data-category="炒菜">🔥 炒菜</div>
+            <div class="nav-tab" data-category="蒸菜">🍲 蒸菜</div>
+            <div class="nav-tab" data-category="汤">🥣 汤</div>
+            <div class="nav-tab" data-category="主食">🍚 主食</div>
+            <div class="nav-tab" data-category="custom">🔥 你点我烧</div>
+        </div>
+    </div>
+    
+    <div class="dishes-container" id="dishes-container">
+        <!-- 菜品将通过JavaScript动态加载 -->
+    </div>
+    
+    <div class="order-section">
+        <h3>📝 当前订单</h3>
+        <div class="order-items" id="order-items">
+            <div style="text-align: center; color: #999; padding: 40px;">
+                🍽️ 您还未选择任何菜品
+            </div>
+        </div>
+        <div class="total-section">
+            <span>订单总计：</span>
+            <span id="total-price">¥0</span>
+        </div>
+        
+        <div class="action-btns">
+            <button class="action-btn confirm-order" id="confirm-order">✅ 确认点餐</button>
+            <button class="action-btn view-history" id="view-history">📋 查看订单历史</button>
+            <button class="action-btn clear-orders" id="clear-current-order">🗑️ 清空当前订单</button>
+        </div>
+    </div>
+    
+    <div class="orders-history" id="orders-history">
+        <button class="close-history" id="close-history">✕ 关闭订单历史</button>
+        <h3>📊 订单历史</h3>
+        <div class="stats-box" style="background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);">
+            <div class="stats-item">
+                <span class="stats-label">订单总数：</span>
+                <span class="stats-value" id="orders-count">0</span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-label">累计金额：</span>
+                <span class="stats-value" id="total-amount">¥0</span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-label">今日订单：</span>
+                <span class="stats-value" id="today-count">0</span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-label">操作：</span>
+                <span class="stats-value"><button class="action-btn clear-orders" id="clear-all-orders" style="padding: 8px 15px; font-size: 14px;">🗑️ 清空所有历史订单</button></span>
+            </div>
+        </div>
+        <div class="orders-list" id="orders-list">
+            <div class="no-orders" id="no-orders">
+                📭 暂无订单历史
+            </div>
+        </div>
+    </div>
+    
+    <!-- 自定义菜品管理对话框 -->
+    <div class="custom-dish-dialog" id="custom-dish-dialog">
+        <div class="dialog-header">
+            <div class="dialog-title">🔥 管理自定义菜品</div>
+            <button class="dialog-close" id="close-custom-dialog">×</button>
+        </div>
+        
+        <div class="custom-dish-list" id="custom-dish-list-dialog">
+            <!-- 自定义菜品列表将通过JavaScript动态加载 -->
+        </div>
+        
+        <div class="dialog-footer">
+            <button class="admin-btn" id="close-dialog-btn">关闭</button>
+            <button class="admin-btn danger" id="delete-all-custom-dialog">🗑️ 删除所有自定义菜品</button>
+        </div>
+    </div>
+    
+    <div class="dialog-overlay" id="dialog-overlay"></div>
+    
+    <div class="notification" id="notification">
+        通知消息
+    </div>
+    
+    <script>
+        // 孟家点餐系统 - 管理员权限版
+        
+        // =============================
+        // 系统配置和状态
+        // =============================
+        
+        // 管理员配置
+        const ADMIN_CONFIG = {
+            username: 'mengjian',
+            password: 'mj123456',
+            isLoggedIn: false,
+            permissions: {
+                editDishes: true,
+                editUsers: true,
+                editPrices: true,
+                editSettings: true,
+                deleteCustomDishes: true,
+                resetData: true
+            }
+        };
+        
+        // 菜品数据库 - 所有菜品价格都改为1元
+        const dishDatabase = {
+            "all": [
+                {
+                    id: 1,
+                    name: "红烧带鱼",
+                    category: "荤菜",
+                    description: "带鱼切断，油煎后红烧，肉质鲜嫩入味",
+                    price: 1
+                },
+                {
+                    id: 2,
+                    name: "凉拌莴苣",
+                    category: "蔬菜", 
+                    description: "莴苣清脆爽口，酱汁开胃解腻",
+                    price: 1
+                },
+                {
+                    id: 3,
+                    name: "糖醋排骨",
+                    category: "荤菜",
+                    description: "排骨外酥里嫩，酸甜可口，肉质酥烂",
+                    price: 1
+                },
+                {
+                    id: 4,
+                    name: "青椒土豆丝",
+                    category: "蔬菜",
+                    description: "土豆丝清脆爽口，青椒香气浓郁", 
+                    price: 1
+                },
+                {
+                    id: 5,
+                    name: "番茄土豆牛肉汤",
+                    category: "汤",
+                    description: "番茄酸甜开胃，牛肉软烂，土豆香浓",
+                    price: 1
+                },
+                {
+                    id: 6,
+                    name: "蒜蓉西兰花", 
+                    category: "蔬菜",
+                    description: "西兰花清脆爽口，蒜蓉香气扑鼻",
+                    price: 1
+                },
+                {
+                    id: 7,
+                    name: "鱼香肉丝", 
+                    category: "炒菜",
+                    description: "肉丝嫩滑，鱼香味浓，咸鲜酸甜",
+                    price: 1
+                },
+                {
+                    id: 8,
+                    name: "宫保鸡丁", 
+                    category: "炒菜",
+                    description: "鸡肉鲜嫩，花生香脆，麻辣酸甜",
+                    price: 1
+                },
+                {
+                    id: 9,
+                    name: "麻婆豆腐", 
+                    category: "炒菜",
+                    description: "豆腐嫩滑，麻辣鲜香，口感丰富",
+                    price: 1
+                },
+                {
+                    id: 10,
+                    name: "清蒸鲈鱼", 
+                    category: "蒸菜",
+                    description: "鲈鱼鲜嫩清甜，原汁原味，肉质细滑",
+                    price: 1
+                },
+                {
+                    id: 11,
+                    name: "红烧肉",
+                    category: "荤菜",
+                    description: "五花肉烧制，色泽红亮，肥而不腻",
+                    price: 1
+                },
+                {
+                    id: 12,
+                    name: "油面筋塞肉",
+                    category: "荤菜",
+                    description: "无锡特色，面筋包肉，汤汁浓郁",
+                    price: 1
+                },
+                {
+                    id: 13,
+                    name: "雪菜炒笋片",
+                    category: "蔬菜",
+                    description: "咸香雪菜配脆嫩笋片，下饭佳品",
+                    price: 1
+                },
+                {
+                    id: 14,
+                    name: "冬瓜排骨汤",
+                    category: "汤",
+                    description: "清热解暑，排骨软烂，汤鲜味美",
+                    price: 1
+                },
+                {
+                    id: 15,
+                    name: "韭菜炒鸡蛋",
+                    category: "炒菜",
+                    description: "简单家常菜，韭菜香浓，鸡蛋嫩滑",
+                    price: 1
+                },
+                {
+                    id: 16,
+                    name: "无锡排骨",
+                    category: "荤菜",
+                    description: "色泽酱红，肉质酥烂，骨香浓郁，咸中带甜",
+                    price: 1
+                },
+                {
+                    id: 17,
+                    name: "梁溪脆鳝",
+                    category: "荤菜",
+                    description: "鳝鱼炸至酥脆，酱汁浓郁，甜中带咸",
+                    price: 1
+                },
+                {
+                    id: 18,
+                    name: "油面筋塞肉",
+                    category: "荤菜",
+                    description: "无锡传统名菜，面筋Q弹，肉馅鲜美",
+                    price: 1
+                },
+                {
+                    id: 19,
+                    name: "镜箱豆腐",
+                    category: "荤菜",
+                    description: "豆腐中塞入肉馅，形如镜箱，鲜嫩多汁",
+                    price: 1
+                },
+                {
+                    id: 20,
+                    name: "腐乳汁肉",
+                    category: "荤菜",
+                    description: "五花肉用腐乳烧制，色泽红亮，肥而不腻",
+                    price: 1
+                },
+                {
+                    id: 21,
+                    name: "清炒时蔬",
+                    category: "蔬菜",
+                    description: "当季蔬菜，大火快炒，清脆爽口",
+                    price: 1
+                },
+                {
+                    id: 22,
+                    name: "蒜蓉西兰花",
+                    category: "蔬菜",
+                    description: "西兰花清脆爽口，蒜蓉香气扑鼻",
+                    price: 1
+                },
+                {
+                    id: 23,
+                    name: "凉拌黄瓜",
+                    category: "蔬菜",
+                    description: "黄瓜拍段，蒜泥辣椒油拌制，爽口开胃",
+                    price: 1
+                },
+                {
+                    id: 24,
+                    name: "清炒豆苗",
+                    category: "蔬菜",
+                    description: "豆苗嫩绿，蒜香浓郁，清脆爽口",
+                    price: 1
+                },
+                {
+                    id: 25,
+                    name: "红烧鸡翅",
+                    category: "荤菜",
+                    description: "鸡翅红烧入味，肉质鲜嫩，酱汁浓郁",
+                    price: 1
+                },
+                {
+                    id: 26,
+                    name: "糖醋里脊",
+                    category: "荤菜",
+                    description: "里脊肉外酥里嫩，酸甜可口，开胃下饭",
+                    price: 1
+                },
+                {
+                    id: 27,
+                    name: "葱油鸡",
+                    category: "荤菜",
+                    description: "鸡肉鲜嫩，葱油香气扑鼻，清淡健康",
+                    price: 1
+                },
+                {
+                    id: 28,
+                    name: "鱼香肉丝",
+                    category: "炒菜",
+                    description: "肉丝嫩滑，鱼香味浓，咸鲜酸甜",
+                    price: 1
+                },
+                {
+                    id: 29,
+                    name: "宫保鸡丁",
+                    category: "炒菜",
+                    description: "鸡肉鲜嫩，花生香脆，麻辣酸甜",
+                    price: 1
+                },
+                {
+                    id: 30,
+                    name: "青椒肉丝",
+                    category: "炒菜",
+                    description: "肉丝嫩滑，青椒清脆，咸香下饭",
+                    price: 1
+                },
+                {
+                    id: 31,
+                    name: "豆角炒肉",
+                    category: "炒菜",
+                    description: "豆角软烂，肉片香嫩，家常味道",
+                    price: 1
+                },
+                {
+                    id: 32,
+                    name: "清蒸鲈鱼",
+                    category: "蒸菜",
+                    description: "鲈鱼鲜嫩清甜，原汁原味，肉质细滑",
+                    price: 1
+                },
+                {
+                    id: 33,
+                    name: "肉末蒸蛋",
+                    category: "蒸菜",
+                    description: "鸡蛋嫩滑，肉末鲜美，老少皆宜",
+                    price: 1
+                },
+                {
+                    id: 34,
+                    name: "梅菜扣肉",
+                    category: "蒸菜",
+                    description: "五花肉软烂，梅菜咸香，肥而不腻",
+                    price: 1
+                },
+                {
+                    id: 35,
+                    name: "番茄蛋花汤",
+                    category: "汤",
+                    description: "番茄酸甜，蛋花滑嫩，简单开胃",
+                    price: 1
+                },
+                {
+                    id: 36,
+                    name: "冬瓜排骨汤",
+                    category: "汤",
+                    description: "清热解暑，排骨软烂，汤鲜味美",
+                    price: 1
+                },
+                {
+                    id: 37,
+                    name: "玉米排骨汤",
+                    category: "汤",
+                    description: "玉米香甜，排骨鲜嫩，汤浓味美",
+                    price: 1
+                },
+                {
+                    id: 38,
+                    name: "鱼头豆腐汤",
+                    category: "汤",
+                    description: "鱼头鲜美，豆腐嫩滑，汤白浓郁",
+                    price: 1
+                },
+                {
+                    id: 39,
+                    name: "凉拌皮蛋豆腐",
+                    category: "蔬菜",
+                    description: "皮蛋Q弹，豆腐嫩滑，酱汁开胃",
+                    price: 1
+                },
+                {
+                    id: 40,
+                    name: "酸辣土豆丝",
+                    category: "蔬菜",
+                    description: "土豆丝清脆，酸辣开胃，下饭佳品",
+                    price: 1
+                },
+                {
+                    id: 41,
+                    name: "蚝油生菜",
+                    category: "蔬菜",
+                    description: "生菜清脆，蚝油鲜美，健康低脂",
+                    price: 1
+                },
+                {
+                    id: 42,
+                    name: "手撕包菜",
+                    category: "蔬菜",
+                    description: "包菜爽脆，干辣椒香，家常美味",
+                    price: 1
+                },
+                {
+                    id: 43,
+                    name: "地三鲜",
+                    category: "蔬菜",
+                    description: "土豆茄子青椒，东北家常菜，咸香下饭",
+                    price: 1
+                },
+                {
+                    id: 44,
+                    name: "红烧狮子头",
+                    category: "荤菜",
+                    description: "肉丸扎实，酱汁浓郁，经典淮扬菜",
+                    price: 1
+                },
+                {
+                    id: 45,
+                    name: "椒盐虾",
+                    category: "荤菜",
+                    description: "大虾酥脆，椒盐香气，外酥里嫩",
+                    price: 1
+                },
+                {
+                    id: 46,
+                    name: "水煮肉片",
+                    category: "荤菜",
+                    description: "肉片嫩滑，麻辣鲜香，川菜经典",
+                    price: 1
+                },
+                {
+                    id: 47,
+                    name: "回锅肉",
+                    category: "荤菜",
+                    description: "五花肉肥而不腻，郫县豆瓣香气浓郁",
+                    price: 1
+                },
+                {
+                    id: 48,
+                    name: "酱牛肉",
+                    category: "荤菜",
+                    description: "牛肉酱香浓郁，肉质紧实，切片整齐",
+                    price: 1
+                },
+                {
+                    id: 49,
+                    name: "酸菜鱼",
+                    category: "炒菜",
+                    description: "鱼肉鲜嫩，酸菜爽口，汤鲜味美",
+                    price: 1
+                },
+                {
+                    id: 50,
+                    name: "干煸四季豆",
+                    category: "炒菜",
+                    description: "四季豆干香，肉末咸鲜，微辣下饭",
+                    price: 1
+                },
+                {
+                    id: 51,
+                    name: "木须肉",
+                    category: "炒菜",
+                    description: "肉片鸡蛋木耳黄瓜，色香味俱全",
+                    price: 1
+                },
+                {
+                    id: 52,
+                    name: "京酱肉丝",
+                    category: "炒菜",
+                    description: "肉丝酱香浓郁，搭配豆皮黄瓜丝",
+                    price: 1
+                },
+                {
+                    id: 53,
+                    name: "蒸肉饼",
+                    category: "蒸菜",
+                    description: "肉饼鲜嫩多汁，咸香适口，简单美味",
+                    price: 1
+                },
+                {
+                    id: 54,
+                    name: "粉蒸排骨",
+                    category: "蒸菜",
+                    description: "排骨软烂，米粉香糯，咸鲜微辣",
+                    price: 1
+                },
+                {
+                    id: 55,
+                    name: "蒜蓉粉丝蒸扇贝",
+                    category: "蒸菜",
+                    description: "扇贝鲜嫩，粉丝入味，蒜香浓郁",
+                    price: 1
+                },
+                {
+                    id: 56,
+                    name: "鸡汤",
+                    category: "汤",
+                    description: "老母鸡炖制，汤色金黄，鲜香浓郁",
+                    price: 1
+                },
+                {
+                    id: 57,
+                    name: "紫菜蛋花汤",
+                    category: "汤",
+                    description: "紫菜鲜美，蛋花滑嫩，简单快手",
+                    price: 1
+                },
+                {
+                    id: 58,
+                    name: "酸辣汤",
+                    category: "汤",
+                    description: "豆腐木耳肉丝，酸辣开胃，暖身暖心",
+                    price: 1
+                },
+                {
+                    id: 59,
+                    name: "西湖牛肉羹",
+                    category: "汤",
+                    description: "牛肉嫩滑，豆腐细腻，汤羹鲜美",
+                    price: 1
+                },
+                {
+                    id: 60,
+                    name: "银耳莲子汤",
+                    category: "汤",
+                    description: "银耳软糯，莲子绵软，清甜滋润",
+                    price: 1
+                },
+                {
+                    id: 61,
+                    name: "白米饭",
+                    category: "主食",
+                    description: "优质大米，粒粒分明，香气扑鼻",
+                    price: 1
+                },
+                {
+                    id: 62,
+                    name: "扬州炒饭",
+                    category: "主食",
+                    description: "米饭粒粒分明，鸡蛋火腿虾仁，香气四溢",
+                    price: 1
+                },
+                {
+                    id: 63,
+                    name: "葱油拌面",
+                    category: "主食",
+                    description: "面条劲道，葱油香气，简单美味",
+                    price: 1
+                }
+            ],
+            "蔬菜": [],
+            "荤菜": [],
+            "炒菜": [],
+            "蒸菜": [],
+            "汤": [],
+            "主食": [],
+            "custom": []  // 自定义菜品分类
+        };
+
+        // 系统用户列表
+        let systemUsers = [
+            "孟建忠",
+            "谢福珍", 
+            "孟剑",
+            "惠鑫磊",
+            "孟艾馨",
+            "孟桢",
+            "李琳云",
+            "孟稷航"
+        ];
+
+        // 系统设置
+        let systemSettings = {
+            defaultPrice: 1,
+            priceUnit: "¥",
+            dishesPerPage: 20,
+            showDescriptions: true,
+            showImages: false,
+            autoSaveInterval: 5, // 分钟
+            keepOrdersDays: 30
+        };
+
+        // 全局状态
+        let currentUser = '';
+        let currentCategory = 'all';
+        let selectedDishes = []; // 存储 {id, name, price, category, quantity, isCustom}
+        let allOrdersHistory = [];
+        let nextCustomDishId = 1000; // 自定义菜品ID从1000开始
+        let nextDishId = 64; // 新菜品ID从64开始
+
+        // =============================
+        // 管理员功能模块
+        // =============================
+        
+        // 管理员登录
+        function adminLogin(username, password) {
+            if (username === ADMIN_CONFIG.username && password === ADMIN_CONFIG.password) {
+                ADMIN_CONFIG.isLoggedIn = true;
+                updateAdminUI();
+                showNotification('🔑 管理员登录成功！', 'success');
+                return true;
+            } else {
+                showNotification('❌ 用户名或密码错误', 'error');
+                return false;
+            }
+        }
+        
+        // 管理员登出
+        function adminLogout() {
+            ADMIN_CONFIG.isLoggedIn = false;
+            updateAdminUI();
+            showNotification('🚪 已退出管理员登录', 'info');
+        }
+        
+        // 更新管理员界面
+        function updateAdminUI() {
+            const adminStatusText = document.getElementById('admin-status-text');
+            const showLoginBtn = document.getElementById('show-login');
+            const showAdminPanelBtn = document.getElementById('show-admin-panel');
+            const logoutBtn = document.getElementById('logout-admin');
+            const loginSection = document.getElementById('admin-login-section');
+            const adminPanel = document.getElementById('admin-control-panel');
+            
+            if (ADMIN_CONFIG.isLoggedIn) {
+                adminStatusText.textContent = `🔐 管理员：${ADMIN_CONFIG.username}`;
+                adminStatusText.style.color = '#2a5298';
+                showLoginBtn.style.display = 'none';
+                showAdminPanelBtn.style.display = 'block';
+                logoutBtn.style.display = 'block';
+                loginSection.classList.remove('show');
+                adminPanel.classList.add('show');
+            } else {
+                adminStatusText.textContent = '未登录管理员';
+                adminStatusText.style.color = '#666';
+                showLoginBtn.style.display = 'block';
+                showAdminPanelBtn.style.display = 'none';
+                logoutBtn.style.display = 'none';
+                adminPanel.classList.remove('show');
+            }
+        }
+        
+        // 显示管理员面板
+        function showAdminPanel() {
+            if (!ADMIN_CONFIG.isLoggedIn) {
+                showNotification('请先登录管理员账号', 'warning');
+                return;
+            }
+            
+            const adminPanel = document.getElementById('admin-control-panel');
+            adminPanel.classList.add('show');
+            loadAdminSections();
+        }
+        
+        // 加载管理员面板各模块
+        function loadAdminSections() {
+            loadDishesAdmin();
+            loadUsersAdmin();
+            loadCustomDishesAdmin();
+        }
+        
+        // 加载菜品管理
+        function loadDishesAdmin() {
+            const dishList = document.getElementById('dish-list-admin');
+            let html = '';
+            
+            dishDatabase.all.forEach(dish => {
+                if (dish.isCustom) return; // 自定义菜品在自定义模块显示
+                
+                html += `
+                    <div class="dish-item-admin" data-id="${dish.id}">
+                        <input type="text" class="dish-name-input" value="${dish.name}" placeholder="菜品名称">
+                        <select class="dish-category-select">
+                            <option value="蔬菜" ${dish.category === '蔬菜' ? 'selected' : ''}>蔬菜</option>
+                            <option value="荤菜" ${dish.category === '荤菜' ? 'selected' : ''}>荤菜</option>
+                            <option value="炒菜" ${dish.category === '炒菜' ? 'selected' : ''}>炒菜</option>
+                            <option value="蒸菜" ${dish.category === '蒸菜' ? 'selected' : ''}>蒸菜</option>
+                            <option value="汤" ${dish.category === '汤' ? 'selected' : ''}>汤</option>
+                            <option value="主食" ${dish.category === '主食' ? 'selected' : ''}>主食</option>
+                        </select>
+                        <input type="number" class="dish-price-input" value="${dish.price}" min="0" step="0.01" placeholder="价格">
+                        <input type="text" class="dish-description-input" value="${dish.description}" placeholder="菜品描述">
+                        <div class="dish-actions">
+                            <button class="admin-btn" onclick="saveDishChanges(${dish.id})">💾</button>
+                            <button class="admin-btn danger" onclick="deleteDish(${dish.id})" ${dish.id <= 63 ? 'disabled' : ''}>🗑️</button>
+                        </div>
+                    </div>`;
+            });
+            
+            dishList.innerHTML = html;
+        }
+        
+        // 保存菜品修改
+        function saveDishChanges(dishId) {
+            const dishItem = document.querySelector(`.dish-item-admin[data-id="${dishId}"]`);
+            if (!dishItem) return;
+            
+            const name = dishItem.querySelector('.dish-name-input').value.trim();
+            const category = dishItem.querySelector('.dish-category-select').value;
+            const price = parseFloat(dishItem.querySelector('.dish-price-input').value);
+            const description = dishItem.querySelector('.dish-description-input').value.trim();
+            
+            if (!name || price < 0) {
+                showNotification('菜品名称不能为空，价格不能为负数', 'error');
+                return;
+            }
+            
+            // 更新菜品数据
+            const dishIndex = dishDatabase.all.findIndex(d => d.id === dishId);
+            if (dishIndex !== -1) {
+                dishDatabase.all[dishIndex].name = name;
+                dishDatabase.all[dishIndex].category = category;
+                dishDatabase.all[dishIndex].price = price;
+                dishDatabase.all[dishIndex].description = description;
+                
+                // 重新分类
+                initCategories();
+                saveData();
+                updateUI();
+                showNotification(`✅ 菜品 "${name}" 已更新`, 'success');
+            }
+        }
+        
+        // 删除菜品
+        function deleteDish(dishId) {
+            // 前63道是基础菜品，不能删除
+            if (dishId <= 63) {
+                showNotification('基础菜品不能删除，只能修改', 'warning');
+                return;
+            }
+            
+            if (confirm('确定要删除这个菜品吗？此操作不可撤销！')) {
+                const dishIndex = dishDatabase.all.findIndex(d => d.id === dishId);
+                if (dishIndex !== -1) {
+                    const dishName = dishDatabase.all[dishIndex].name;
+                    dishDatabase.all.splice(dishIndex, 1);
+                    
+                    // 重新分类
+                    initCategories();
+                    saveData();
+                    updateUI();
+                    loadDishesAdmin();
+                    showNotification(`🗑️ 菜品 "${dishName}" 已删除`, 'success');
+                }
+            }
+        }
+        
+        // 添加新菜品
+        function addNewDish() {
+            const dishName = prompt('请输入新菜品名称：');
+            if (!dishName || dishName.trim() === '') {
+                showNotification('菜品名称不能为空', 'error');
+                return;
+            }
+            
+            const newDish = {
+                id: nextDishId++,
+                name: dishName.trim(),
+                category: "荤菜", // 默认分类
+                description: "新添加的菜品",
+                price: systemSettings.defaultPrice
+            };
+            
+            dishDatabase.all.push(newDish);
+            initCategories();
+            saveData();
+            updateUI();
+            loadDishesAdmin();
+            showNotification(`✅ 新菜品 "${dishName}" 已添加`, 'success');
+        }
+        
+        // 保存所有菜品修改
+        function saveAllDishChanges() {
+            const dishItems = document.querySelectorAll('.dish-item-admin');
+            let updatedCount = 0;
+            
+            dishItems.forEach(item => {
+                const dishId = parseInt(item.dataset.id);
+                const name = item.querySelector('.dish-name-input').value.trim();
+                const category = item.querySelector('.dish-category-select').value;
+                const price = parseFloat(item.querySelector('.dish-price-input').value);
+                const description = item.querySelector('.dish-description-input').value.trim();
+                
+                if (!name || price < 0) {
+                    showNotification('发现无效数据，请检查', 'error');
+                    return;
+                }
+                
+                const dishIndex = dishDatabase.all.findIndex(d => d.id === dishId);
+                if (dishIndex !== -1) {
+                    dishDatabase.all[dishIndex].name = name;
+                    dishDatabase.all[dishIndex].category = category;
+                    dishDatabase.all[dishIndex].price = price;
+                    dishDatabase.all[dishIndex].description = description;
+                    updatedCount++;
+                }
+            });
+            
+            initCategories();
+            saveData();
+            updateUI();
+            showNotification(`✅ ${updatedCount} 个菜品已保存`, 'success');
+        }
+        
+        // 加载用户管理
+        function loadUsersAdmin() {
+            const userList = document.getElementById('user-list-admin');
+            let html = '';
+            
+            systemUsers.forEach((user, index) => {
+                html += `
+                    <div class="user-item-admin">
+                        <input type="text" class="user-name-input" value="${user}" placeholder="用户姓名">
+                        <div style="display: flex; gap: 5px;">
+                            <button class="admin-btn danger" onclick="deleteUser(${index})" ${systemUsers.length <= 1 ? 'disabled' : ''}>🗑️</button>
+                            ${index > 0 ? `<button class="admin-btn" onclick="moveUserUp(${index})">⬆️</button>` : ''}
+                            ${index < systemUsers.length - 1 ? `<button class="admin-btn" onclick="moveUserDown(${index})">⬇️</button>` : ''}
+                        </div>
+                    </div>`;
+            });
+            
+            userList.innerHTML = html;
+            updateUserSelect();
+        }
+        
+        // 添加新用户
+        function addNewUser() {
+            const newUserNameInput = document.getElementById('new-user-name');
+            const userName = newUserNameInput.value.trim();
+            
+            if (!userName) {
+                showNotification('请输入用户姓名', 'error');
+                return;
+            }
+            
+            if (systemUsers.includes(userName)) {
+                showNotification('用户已存在', 'warning');
+                return;
+            }
+            
+            systemUsers.push(userName);
+            newUserNameInput.value = '';
+            loadUsersAdmin();
+            saveData();
+            showNotification(`✅ 新用户 "${userName}" 已添加`, 'success');
+        }
+        
+        // 删除用户
+        function deleteUser(index) {
+            if (systemUsers.length <= 1) {
+                showNotification('至少需要保留一个用户', 'warning');
+                return;
+            }
+            
+            const userName = systemUsers[index];
+            if (confirm(`确定要删除用户 "${userName}" 吗？`)) {
+                systemUsers.splice(index, 1);
+                loadUsersAdmin();
+                saveData();
+                showNotification(`🗑️ 用户 "${userName}" 已删除`, 'success');
+            }
+        }
+        
+        // 上移用户
+        function moveUserUp(index) {
+            if (index <= 0) return;
+            
+            const temp = systemUsers[index];
+            systemUsers[index] = systemUsers[index - 1];
+            systemUsers[index - 1] = temp;
+            
+            loadUsersAdmin();
+            saveData();
+        }
+        
+        // 下移用户
+        function moveUserDown(index) {
+            if (index >= systemUsers.length - 1) return;
+            
+            const temp = systemUsers[index];
+            systemUsers[index] = systemUsers[index + 1];
+            systemUsers[index + 1] = temp;
+            
+            loadUsersAdmin();
+            saveData();
+        }
+        
+        // 保存用户列表
+        function saveUserList() {
+            const userItems = document.querySelectorAll('.user-item-admin');
+            const newUserList = [];
+            
+            userItems.forEach(item => {
+                const userName = item.querySelector('.user-name-input').value.trim();
+                if (userName) {
+                    newUserList.push(userName);
+                }
+            });
+            
+            if (newUserList.length === 0) {
+                showNotification('用户列表不能为空', 'error');
+                return;
+            }
+            
+            systemUsers = newUserList;
+            updateUserSelect();
+            saveData();
+            showNotification(`✅ 用户列表已保存 (${newUserList.length} 个用户)`, 'success');
+        }
+        
+        // 加载自定义菜品管理
+        function loadCustomDishesAdmin() {
+            const customDishList = document.getElementById('custom-dish-list-admin');
+            const adminCustomCount = document.getElementById('admin-custom-count');
+            let html = '';
+            
+            dishDatabase.custom.forEach(dish => {
+                html += `
+                    <div class="dish-item-admin" data-id="${dish.id}">
+                        <input type="text" class="dish-name-input" value="${dish.name}" placeholder="菜品名称">
+                        <select class="dish-category-select" disabled>
+                            <option value="custom" selected>🔥 自定义菜品</option>
+                        </select>
+                        <input type="number" class="dish-price-input" value="${dish.price}" min="0" step="0.01" placeholder="价格">
+                        <input type="text" class="dish-description-input" value="${dish.description}" placeholder="菜品描述">
+                        <div class="dish-actions">
+                            <button class="admin-btn" onclick="saveCustomDishChanges(${dish.id})">💾</button>
+                            <button class="admin-btn danger" onclick="deleteCustomDish(${dish.id})">🗑️</button>
+                        </div>
+                    </div>`;
+            });
+            
+            customDishList.innerHTML = html;
+            adminCustomCount.textContent = dishDatabase.custom.length;
+        }
+        
+        // 保存自定义菜品修改
+        function saveCustomDishChanges(dishId) {
+            const dishItem = document.querySelector(`.dish-item-admin[data-id="${dishId}"]`);
+            if (!dishItem) return;
+            
+            const name = dishItem.querySelector('.dish-name-input').value.trim();
+            const price = parseFloat(dishItem.querySelector('.dish-price-input').value);
+            const description = dishItem.querySelector('.dish-description-input').value.trim();
+            
+            if (!name || price < 0) {
+                showNotification('菜品名称不能为空，价格不能为负数', 'error');
+                return;
+            }
+            
+            // 更新菜品数据
+            const dishIndex = dishDatabase.all.findIndex(d => d.id === dishId);
+            const customIndex = dishDatabase.custom.findIndex(d => d.id === dishId);
+            
+            if (dishIndex !== -1 && customIndex !== -1) {
+                dishDatabase.all[dishIndex].name = name;
+                dishDatabase.all[dishIndex].price = price;
+                dishDatabase.all[dishIndex].description = description;
+                
+                dishDatabase.custom[customIndex].name = name;
+                dishDatabase.custom[customIndex].price = price;
+                dishDatabase.custom[customIndex].description = description;
+                
+                saveData();
+                updateUI();
+                showNotification(`✅ 自定义菜品 "${name}" 已更新`, 'success');
+            }
+        }
+        
+        // 删除自定义菜品
+        function deleteCustomDish(dishId) {
+            if (confirm('确定要删除这个自定义菜品吗？此操作不可撤销！')) {
+                const dishIndex = dishDatabase.all.findIndex(d => d.id === dishId);
+                const customIndex = dishDatabase.custom.findIndex(d => d.id === dishId);
+                
+                if (dishIndex !== -1 && customIndex !== -1) {
+                    const dishName = dishDatabase.all[dishIndex].name;
+                    
+                    // 从所有菜品中移除
+                    dishDatabase.all.splice(dishIndex, 1);
+                    
+                    // 从自定义菜品中移除
+                    dishDatabase.custom.splice(customIndex, 1);
+                    
+                    // 从当前订单中移除
+                    selectedDishes = selectedDishes.filter(item => item.id !== dishId);
+                    
+                    saveData();
+                    updateUI();
+                    loadCustomDishesAdmin();
+                    showNotification(`🗑️ 自定义菜品 "${dishName}" 已删除`, 'success');
+                }
+            }
+        }
+        
+        // 删除所有自定义菜品
+        function deleteAllCustomDishes() {
+            if (dishDatabase.custom.length === 0) {
+                showNotification('没有自定义菜品可删除', 'info');
+                return;
+            }
+            
+            if (confirm(`⚠️ 确定要删除所有 ${dishDatabase.custom.length} 个自定义菜品吗？此操作不可撤销！`)) {
+                // 从所有菜品中移除自定义菜品
+                dishDatabase.all = dishDatabase.all.filter(dish => !dish.isCustom);
+                
+                // 清空自定义菜品列表
+                dishDatabase.custom = [];
+                
+                // 从当前订单中移除自定义菜品
+                selectedDishes = selectedDishes.filter(item => {
+                    const dish = dishDatabase.all.find(d => d.id === item.id);
+                    return dish && !dish.isCustom;
+                });
+                
+                saveData();
+                updateUI();
+                loadCustomDishesAdmin();
+                updateCustomDishCount();
+                showNotification(`🗑️ 所有自定义菜品已删除`, 'success');
+            }
+        }
+        
+        // 保存系统设置
+        function saveSystemSettings() {
+            systemSettings.defaultPrice = parseFloat(document.getElementById('default-price').value);
+            systemSettings.priceUnit = document.getElementById('price-unit').value;
+            systemSettings.dishesPerPage = parseInt(document.getElementById('dishes-per-page').value);
+            systemSettings.showDescriptions = document.getElementById('show-descriptions').checked;
+            systemSettings.showImages = document.getElementById('show-images').checked;
+            systemSettings.autoSaveInterval = parseInt(document.getElementById('auto-save-interval').value);
+            systemSettings.keepOrdersDays = parseInt(document.getElementById('keep-orders-days').value);
+            
+            saveData();
+            showNotification('✅ 系统设置已保存', 'success');
+        }
+        
+        // 重置所有数据
+        function resetAllData() {
+            if (confirm('⚠️ ⚠️ ⚠️\n\n确定要重置所有数据吗？\n\n这将删除：\n✅ 所有订单历史\n✅ 所有自定义菜品\n✅ 所有系统设置\n\n此操作不可撤销！')) {
+                // 清除所有数据
+                selectedDishes = [];
+                allOrdersHistory = [];
+                dishDatabase.custom = [];
+                nextCustomDishId = 1000;
+                
+                // 移除自定义菜品
+                dishDatabase.all = dishDatabase.all.filter(dish => !dish.isCustom);
+                
+                // 重置系统设置
+                systemSettings = {
+                    defaultPrice: 1,
+                    priceUnit: "¥",
+                    dishesPerPage: 20,
+                    showDescriptions: true,
+                    showImages: false,
+                    autoSaveInterval: 5,
+                    keepOrdersDays: 30
+                };
+                
+                // 重新初始化
+                initCategories();
+                saveData();
+                updateUI();
+                loadAdminSections();
+                showNotification('🔄 所有数据已重置为初始状态', 'success');
+            }
+        }
+
+        // =============================
+        // 点餐系统核心功能
+        // =============================
+        
+        // 初始化分类
+        function initCategories() {
+            // 清空各分类
+            for (const cat of ["蔬菜", "荤菜", "炒菜", "蒸菜", "汤", "主食", "custom"]) {
+                dishDatabase[cat] = [];
+            }
+            
+            // 将菜品分配到对应分类
+            dishDatabase.all.forEach(dish => {
+                if (dish.isCustom) {
+                    dishDatabase.custom.push(dish);
+                } else if (dish.category === "蔬菜") {
+                    dishDatabase.蔬菜.push(dish);
+                } else if (dish.category === "荤菜") {
+                    dishDatabase.荤菜.push(dish);
+                } else if (dish.category === "炒菜") {
+                    dishDatabase.炒菜.push(dish);
+                } else if (dish.category === "蒸菜") {
+                    dishDatabase.蒸菜.push(dish);
+                } else if (dish.category === "汤") {
+                    dishDatabase.汤.push(dish);
+                } else if (dish.category === "主食") {
+                    dishDatabase.主食.push(dish);
+                }
+            });
+        }
+
+        // 添加自定义菜品
+        function addCustomDish(dishName) {
+            if (!dishName || dishName.trim() === '') {
+                showNotification('请输入菜品名称', 'warning');
+                return false;
+            }
+            
+            // 检查是否已存在
+            const existingDish = dishDatabase.all.find(dish => 
+                dish.name.toLowerCase() === dishName.toLowerCase().trim()
+            );
+            
+            if (existingDish) {
+                showNotification('菜品已存在', 'info');
+                return false;
+            }
+            
+            // 创建自定义菜品
+            const customDish = {
+                id: nextCustomDishId++,
+                name: dishName.trim(),
+                category: "custom",
+                description: "🔥 您点的自定义菜品",
+                price: systemSettings.defaultPrice,
+                isCustom: true
+            };
+            
+            // 添加到数据库
+            dishDatabase.all.push(customDish);
+            dishDatabase.custom.push(customDish);
+            
+            showNotification(`✅ 已添加自定义菜品：${dishName.trim()}`, 'success');
+            
+            // 更新自定义菜品数量
+            updateCustomDishCount();
+            
+            // 切换到自定义菜品分类
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector('.nav-tab[data-category="custom"]').classList.add('active');
+            currentCategory = 'custom';
+            updateDishCards();
+            
+            // 清空输入框
+            document.getElementById('custom-dish-name').value = '';
+            
+            // 保存数据
+            saveData();
+            
+            // 更新管理员面板
+            if (ADMIN_CONFIG.isLoggedIn) {
+                loadCustomDishesAdmin();
+            }
+            
+            return true;
+        }
+
+        // 删除自定义菜品（用户界面）
+        function deleteCustomDishUser(dishId) {
+            if (!confirm('确定要删除这个自定义菜品吗？')) {
+                return;
+            }
+            
+            const dishIndex = dishDatabase.all.findIndex(d => d.id === dishId);
+            const customIndex = dishDatabase.custom.findIndex(d => d.id === dishId);
+            
+            if (dishIndex !== -1 && customIndex !== -1) {
+                const dishName = dishDatabase.all[dishIndex].name;
+                
+                // 从所有菜品中移除
+                dishDatabase.all.splice(dishIndex, 1);
+                
+                // 从自定义菜品中移除
+                dishDatabase.custom.splice(customIndex, 1);
+                
+                // 从当前订单中移除
+                selectedDishes = selectedDishes.filter(item => item.id !== dishId);
+                
+                saveData();
+                updateUI();
+                updateCustomDishCount();
+                showNotification(`🗑️ 自定义菜品 "${dishName}" 已删除`, 'success');
+                
+                // 更新管理员面板
+                if (ADMIN_CONFIG.isLoggedIn) {
+                    loadCustomDishesAdmin();
+                }
+            }
+        }
+
+        // 更新自定义菜品数量显示
+        function updateCustomDishCount() {
+            const count = dishDatabase.custom.length;
+            document.getElementById('custom-count').textContent = count;
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            
+            // 设置通知颜色
+            if (type === 'success') {
+                notification.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            } else if (type === 'error') {
+                notification.style.background = 'linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)';
+            } else if (type === 'warning') {
+                notification.style.background = 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)';
+            } else {
+                notification.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
+            }
+            
+            notification.style.display = 'block';
+            notification.style.animation = 'slideIn 0.5s ease-out';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // 保存数据到localStorage
+        function saveData() {
+            try {
+                const data = {
+                    selectedDishes: selectedDishes,
+                    allOrdersHistory: allOrdersHistory,
+                    nextCustomDishId: nextCustomDishId,
+                    nextDishId: nextDishId,
+                    customDishes: dishDatabase.custom,
+                    systemUsers: systemUsers,
+                    systemSettings: systemSettings,
+                    isAdminLoggedIn: ADMIN_CONFIG.isLoggedIn,
+                    lastUpdated: new Date().toISOString()
+                };
+                localStorage.setItem('mengFamilyOrderSystemAdmin', JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.warn('无法保存到localStorage:', error);
+                showNotification('数据保存失败，请检查浏览器设置', 'warning');
+                return false;
+            }
+        }
+
+        // 从localStorage加载数据
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('mengFamilyOrderSystemAdmin');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    selectedDishes = data.selectedDishes || [];
+                    allOrdersHistory = data.allOrdersHistory || [];
+                    nextCustomDishId = data.nextCustomDishId || 1000;
+                    nextDishId = data.nextDishId || 64;
+                    systemUsers = data.systemUsers || systemUsers;
+                    systemSettings = data.systemSettings || systemSettings;
+                    ADMIN_CONFIG.isLoggedIn = data.isAdminLoggedIn || false;
+                    
+                    // 恢复自定义菜品
+                    if (data.customDishes && data.customDishes.length > 0) {
+                        // 移除已存在的自定义菜品
+                        dishDatabase.all = dishDatabase.all.filter(dish => !dish.isCustom);
+                        dishDatabase.custom = [];
+                        
+                        // 添加保存的自定义菜品
+                        data.customDishes.forEach(customDish => {
+                            dishDatabase.all.push(customDish);
+                            dishDatabase.custom.push(customDish);
+                        });
+                    }
+                    
+                    updateUI();
+                    updateCustomDishCount();
+                    updateAdminUI();
+                    return true;
+                }
+            } catch (error) {
+                console.warn('无法加载数据:', error);
+                selectedDishes = [];
+                allOrdersHistory = [];
+                nextCustomDishId = 1000;
+                nextDishId = 64;
+                systemUsers = systemUsers;
+                systemSettings = systemSettings;
+                ADMIN_CONFIG.isLoggedIn = false;
+            }
+            return false;
+        }
+
+        // 更新用户选择下拉框
+        function updateUserSelect() {
+            const userSelect = document.getElementById('user-select');
+            userSelect.innerHTML = '<option value="">选择用餐人员</option>';
+            
+            systemUsers.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user;
+                option.textContent = user;
+                userSelect.appendChild(option);
+            });
+            
+            // 设置当前用户
+            if (currentUser && systemUsers.includes(currentUser)) {
+                userSelect.value = currentUser;
+            } else if (systemUsers.length > 0) {
+                currentUser = systemUsers[0];
+                userSelect.value = currentUser;
+            }
+        }
+
+        // 更新用户界面
+        function updateUI() {
+            updateUserSelect();
+            updateDishCards();
+            updateOrderSummary();
+            updateStats();
+        }
+
+        // 更新菜品卡片
+        function updateDishCards() {
+            const container = document.getElementById('dishes-container');
+            container.innerHTML = '';
+            
+            let dishes = dishDatabase[currentCategory] || dishDatabase.all;
+            
+            // 搜索过滤
+            const searchTerm = document.getElementById('dish-search').value.toLowerCase().trim();
+            if (searchTerm) {
+                dishes = dishes.filter(dish => 
+                    dish.name.toLowerCase().includes(searchTerm) ||
+                    dish.description.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            dishes.forEach(dish => {
+                // 检查菜品是否已经在当前订单中
+                const existingDish = selectedDishes.find(d => d.id === dish.id);
+                const quantity = existingDish ? existingDish.quantity : 0;
+                
+                const dishCard = document.createElement('div');
+                dishCard.className = `dish-card ${quantity > 0 ? 'selected' : ''}`;
+                dishCard.dataset.id = dish.id;
+                
+                // 自定义菜品标签
+                const customTag = dish.isCustom ? '<span class="custom-dish-tag">🔥</span>' : '';
+                
+                // 自定义菜品删除按钮
+                const deleteBtn = dish.isCustom ? 
+                    `<button class="custom-dish-delete-btn" onclick="deleteCustomDishUser(${dish.id})">×</button>` : '';
+                
+                dishCard.innerHTML = `
+                    ${deleteBtn}
+                    <div class="dish-name">${dish.name}${customTag}</div>
+                    <div class="dish-price">${systemSettings.priceUnit}${dish.price}</div>
+                    <div class="dish-category">${dish.category}</div>
+                    ${systemSettings.showDescriptions ? `<div class="dish-description">${dish.description}</div>` : ''}
+                    
+                    <div class="quantity-controls">
+                        <button class="qty-btn minus-btn" onclick="changeDishQuantity(${dish.id}, -1)">−</button>
+                        <span class="qty-display" id="qty-${dish.id}">${quantity}</span>
+                        <button class="qty-btn plus-btn" onclick="changeDishQuantity(${dish.id}, 1)">+</button>
+                    </div>`;
+                
+                container.appendChild(dishCard);
+            });
+        }
+
+        // 改变菜品数量
+        function changeDishQuantity(dishId, delta) {
+            const dishIndex = selectedDishes.findIndex(d => d.id === dishId);
+            const dish = dishDatabase.all.find(d => d.id === dishId);
+            
+            if (!dish) {
+                showNotification('菜品不存在', 'error');
+                return;
+            }
+            
+            if (dishIndex === -1) {
+                // 菜品不在当前订单中，添加它
+                if (delta > 0) {
+                    selectedDishes.push({
+                        id: dish.id,
+                        name: dish.name,
+                        price: dish.price,
+                        category: dish.category,
+                        quantity: 1,
+                        isCustom: dish.isCustom || false
+                    });
+                }
+            } else {
+                // 调整菜品数量
+                selectedDishes[dishIndex].quantity += delta;
+                
+                // 如果数量减到0，从订单中移除
+                if (selectedDishes[dishIndex].quantity <= 0) {
+                    selectedDishes.splice(dishIndex, 1);
+                }
+            }
+            
+            // 更新数量显示
+            const qtyDisplay = document.getElementById(`qty-${dishId}`);
+            if (qtyDisplay) {
+                const newQty = selectedDishes.find(d => d.id === dishId)?.quantity || 0;
+                qtyDisplay.textContent = newQty;
+            }
+            
+            updateOrderSummary();
+            saveData();
+            updateStats();
+        }
+
+        // 更新订单摘要
+        function updateOrderSummary() {
+            const orderItems = document.getElementById('order-items');
+            const totalPrice = document.getElementById('total-price');
+            
+            if (selectedDishes.length === 0) {
+                orderItems.innerHTML = `
+                    <div style="text-align: center; color: #999; padding: 40px;">
+                        🍽️ 您还未选择任何菜品
+                    </div>`;
+                totalPrice.textContent = `${systemSettings.priceUnit}0`;
+                return;
+            }
+            
+            // 计算总价
+            let total = 0;
+            let itemsHTML = '';
+            
+            selectedDishes.forEach(item => {
+                const dish = dishDatabase.all.find(d => d.id === item.id);
+                const itemTotal = dish.price * item.quantity;
+                total += itemTotal;
+                
+                // 自定义菜品标签
+                const customTag = dish.isCustom ? '<span class="custom-dish-tag">🔥</span>' : '';
+                
+                itemsHTML += `
+                    <div class="order-item">
+                        <div class="dish-info">
+                            <div class="dish-name-small">${dish.name}${customTag}</div>
+                            <div class="dish-price-small">${systemSettings.priceUnit}${dish.price} × ${item.quantity}</div>
+                        </div>
+                        <div class="order-actions">
+                            <div class="qty-controls-small">
+                                <button class="qty-btn-small" onclick="changeDishQuantity(${dish.id}, -1)" style="width: 32px; height: 32px; border-radius: 50%; background: #ff6b6b; color: white; border: none; font-size: 18px; display: flex; align-items: center; justify-content: center;">−</button>
+                                <span class="qty-display-small" id="order-qty-${dish.id}">${item.quantity}</span>
+                                <button class="qty-btn-small" onclick="changeDishQuantity(${dish.id}, 1)" style="width: 32px; height: 32px; border-radius: 50%; background: #ff6b6b; color: white; border: none; font-size: 18px; display: flex; align-items: center; justify-content: center;">+</button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            
+            orderItems.innerHTML = itemsHTML;
+            totalPrice.textContent = `${systemSettings.priceUnit}${total}`;
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const ordersCount = allOrdersHistory.length;
+            const totalAmount = allOrdersHistory.reduce((sum, order) => sum + (order.total || 0), 0);
+            const today = new Date().toDateString();
+            const todayCount = allOrdersHistory.filter(order => 
+                new Date(order.time).toDateString() === today
+            ).length;
+            
+            document.getElementById('orders-count').textContent = ordersCount;
+            document.getElementById('total-amount').textContent = `${systemSettings.priceUnit}${totalAmount}`;
+            document.getElementById('today-count').textContent = todayCount;
+        }
+
+        // 确认点餐
+        function confirmOrder() {
+            if (!currentUser) {
+                showNotification('请先选择用餐人员', 'warning');
+                return;
+            }
+            
+            if (selectedDishes.length === 0) {
+                showNotification('请至少选择一道菜品', 'warning');
+                return;
+            }
+            
+            // 创建订单
+            const order = {
+                user: currentUser,
+                dishes: selectedDishes.map(item => {
+                    const dish = dishDatabase.all.find(d => d.id === item.id);
+                    return {
+                        id: dish.id,
+                        name: dish.name,
+                        price: dish.price,
+                        quantity: item.quantity,
+                        itemTotal: dish.price * item.quantity,
+                        isCustom: dish.isCustom || false
+                    };
+                }),
+                total: selectedDishes.reduce((sum, item) => {
+                    const dish = dishDatabase.all.find(d => d.id === item.id);
+                    return sum + (dish.price * item.quantity);
+                }, 0),
+                time: new Date().toLocaleString('zh-CN'),
+                id: Date.now()
+            };
+            
+            // 添加到历史
+            allOrdersHistory.push(order);
+            
+            showNotification(`🎉 ${currentUser} 点餐成功！共 ${selectedDishes.length} 道菜，总计 ${systemSettings.priceUnit}${order.total}`, 'success');
+            
+            // 清空当前订单
+            selectedDishes = [];
+            updateUI();
+            updateCustomDishCount();
+            saveData();
+        }
+
+        // 显示订单历史
+        function viewOrderHistory() {
+            const historySection = document.getElementById('orders-history');
+            const ordersList = document.getElementById('orders-list');
+            
+            if (allOrdersHistory.length === 0) {
+                ordersList.innerHTML = `
+                    <div class="no-orders" id="no-orders">
+                        📭 暂无订单历史
+                    </div>`;
+                historySection.classList.add('show');
+                return;
+            }
+            
+            // 按时间倒序排列
+            const sortedOrders = [...allOrdersHistory].sort((a, b) => b.id - a.id);
+            let historyHTML = '';
+            
+            sortedOrders.forEach(order => {
+                historyHTML += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-user">${order.user}</span>
+                                <div class="order-time">${order.time}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="order-dishes">
+                            ${order.dishes.map(item => {
+                                const customTag = item.isCustom ? '<span class="custom-dish-tag">🔥</span>' : '';
+                                return `
+                                    <div class="order-dish-item">
+                                        <span class="order-dish-name">${item.name}${customTag}</span>
+                                        <span class="order-dish-qty">${item.quantity} 份</span>
+                                        <span style="color: #ff6b6b; font-weight: bold;">${systemSettings.priceUnit}${item.itemTotal}</span>
+                                    </div>`;
+                            }).join('')}
+                        </div>
+                        
+                        <div class="total-section">
+                            <span>订单总计：</span>
+                            <span>${systemSettings.priceUnit}${order.total}</span>
+                        </div>
+                    </div>`;
+            });
+            
+            ordersList.innerHTML = historyHTML;
+            historySection.classList.add('show');
+        }
+
+        // 清空当前订单
+        function clearCurrentOrder() {
+            if (selectedDishes.length === 0) {
+                showNotification('当前没有菜品可清空', 'info');
+                return;
+            }
+            
+            if (confirm('确定要清空当前订单吗？将移除所有已选择的菜品！')) {
+                selectedDishes = [];
+                updateUI();
+                saveData();
+                showNotification('当前订单已清空', 'success');
+            }
+        }
+
+        // 清空所有订单历史
+        function clearAllOrdersHistory() {
+            if (allOrdersHistory.length === 0) {
+                showNotification('暂无订单历史可清空', 'info');
+                return;
+            }
+            
+            if (confirm('⚠️ 确定要清空所有订单历史吗？此操作不可撤销！将删除所有已保存的订单！')) {
+                allOrdersHistory = [];
+                saveData();
+                updateStats();
+                viewOrderHistory(); // 刷新显示
+                showNotification('所有订单历史已清空', 'success');
+            }
+        }
+
+        // 显示自定义菜品管理对话框
+        function showCustomDishDialog() {
+            const dialog = document.getElementById('custom-dish-dialog');
+            const overlay = document.getElementById('dialog-overlay');
+            const customDishList = document.getElementById('custom-dish-list-dialog');
+            
+            let html = '';
+            
+            dishDatabase.custom.forEach(dish => {
+                html += `
+                    <div class="custom-dish-item">
+                        <div class="custom-dish-info">
+                            <div class="custom-dish-name">${dish.name}</div>
+                            <div style="color: #666; font-size: 14px;">${systemSettings.priceUnit}${dish.price}</div>
+                        </div>
+                        <div class="custom-dish-actions">
+                            <button class="admin-btn danger" onclick="deleteCustomDishUser(${dish.id}); closeCustomDishDialog();">🗑️ 删除</button>
+                        </div>
+                    </div>`;
+            });
+            
+            if (html === '') {
+                html = '<div style="text-align: center; padding: 40px; color: #999;">暂无自定义菜品</div>';
+            }
+            
+            customDishList.innerHTML = html;
+            dialog.classList.add('show');
+            overlay.classList.add('show');
+        }
+
+        // 关闭自定义菜品管理对话框
+        function closeCustomDishDialog() {
+            const dialog = document.getElementById('custom-dish-dialog');
+            const overlay = document.getElementById('dialog-overlay');
+            
+            dialog.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+
+        // 初始化应用
+        function initApp() {
+            console.log('孟家点餐系统 - 管理员权限版初始化...');
+            
+            // 1. 初始化分类
+            initCategories();
+            
+            // 2. 加载已保存的数据
+            loadData();
+            
+            // 3. 设置事件监听器
+            setupEventListeners();
+            
+            // 4. 更新UI
+            updateUI();
+            
+            console.log('系统初始化完成');
+            console.log('菜品总数：' + dishDatabase.all.length);
+            console.log('自定义菜品：' + dishDatabase.custom.length);
+            console.log('用户总数：' + systemUsers.length);
+            console.log('管理员状态：' + (ADMIN_CONFIG.isLoggedIn ? '已登录' : '未登录'));
+            
+            // 显示初始化完成通知
+            setTimeout(() => {
+                showNotification(`🎉 孟家点餐系统管理员版已就绪！`, 'success');
+            }, 1500);
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 用户选择
+            const userSelect = document.getElementById('user-select');
+            userSelect.addEventListener('change', function(e) {
+                currentUser = e.target.value;
+                if (currentUser) {
+                    showNotification(`👨‍👩‍👧‍👦 用餐人员：${currentUser}`, 'info');
+                }
+            });
+            
+            // 添加自定义菜品
+            const addCustomBtn = document.getElementById('add-custom-dish');
+            const customDishInput = document.getElementById('custom-dish-name');
+            
+            addCustomBtn.addEventListener('click', function() {
+                const dishName = customDishInput.value;
+                addCustomDish(dishName);
+            });
+            
+            // 按回车键添加自定义菜品
+            customDishInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const dishName = customDishInput.value;
+                    addCustomDish(dishName);
+                }
+            });
+            
+            // 管理自定义菜品按钮
+            document.getElementById('manage-custom-dishes').addEventListener('click', showCustomDishDialog);
+            
+            // 搜索功能
+            const dishSearch = document.getElementById('dish-search');
+            dishSearch.addEventListener('input', function() {
+                updateDishCards();
+            });
+            
+            // 导航标签
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.category;
+                    updateDishCards();
+                });
+            });
+            
+            // 确认点餐按钮
+            document.getElementById('confirm-order').addEventListener('click', confirmOrder);
+            
+            // 查看订单历史按钮
+            document.getElementById('view-history').addEventListener('click', viewOrderHistory);
+            
+            // 清空当前订单按钮
+            document.getElementById('clear-current-order').addEventListener('click', clearCurrentOrder);
+            
+            // 清空所有订单历史按钮
+            document.getElementById('clear-all-orders').addEventListener('click', clearAllOrdersHistory);
+            
+            // 关闭订单历史
+            document.getElementById('close-history').addEventListener('click', function() {
+                document.getElementById('orders-history').classList.remove('show');
+            });
+            
+            // 管理员登录相关事件
+            document.getElementById('show-login').addEventListener('click', function() {
+                document.getElementById('admin-login-section').classList.add('show');
+            });
+            
+            document.getElementById('admin-login-btn').addEventListener('click', function() {
+                const username = document.getElementById('admin-username').value;
+                const password = document.getElementById('admin-password').value;
+                adminLogin(username, password);
+            });
+            
+            document.getElementById('show-admin-panel').addEventListener('click', showAdminPanel);
+            
+            document.getElementById('logout-admin').addEventListener('click', adminLogout);
+            
+            // 管理员面板标签切换
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const tabId = this.dataset.tab;
+                    document.querySelectorAll('.admin-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}-section`).classList.add('active');
+                });
+            });
+            
+            // 菜品管理事件
+            document.getElementById('add-new-dish').addEventListener('click', addNewDish);
+            document.getElementById('save-dish-changes').addEventListener('click', saveAllDishChanges);
+            
+            // 用户管理事件
+            document.getElementById('add-new-user').addEventListener('click', addNewUser);
+            document.getElementById('save-user-changes').addEventListener('click', saveUserList);
+            
+            // 系统设置事件
+            document.getElementById('save-settings').addEventListener('click', saveSystemSettings);
+            document.getElementById('reset-all-data').addEventListener('click', resetAllData);
+            
+            // 自定义菜品管理事件
+            document.getElementById('delete-all-custom').addEventListener('click', deleteAllCustomDishes);
+            
+            // 对话框关闭事件
+            document.getElementById('close-custom-dialog').addEventListener('click', closeCustomDishDialog);
+            document.getElementById('close-dialog-btn').addEventListener('click', closeCustomDishDialog);
+            document.getElementById('delete-all-custom-dialog').addEventListener('click', function() {
+                deleteAllCustomDishes();
+                closeCustomDishDialog();
+            });
+            document.getElementById('dialog-overlay').addEventListener('click', closeCustomDishDialog);
+            
+            // 按Esc键关闭对话框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeCustomDishDialog();
+                }
+            });
+            
+            // 自动保存（如果启用）
+            if (systemSettings.autoSaveInterval > 0) {
+                setInterval(() => {
+                    if (selectedDishes.length > 0 || allOrdersHistory.length > 0) {
+                        saveData();
+                    }
+                }, systemSettings.autoSaveInterval * 60000);
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // 全局导出函数供onclick使用
+        window.changeDishQuantity = changeDishQuantity;
+        window.addCustomDish = addCustomDish;
+        window.deleteCustomDishUser = deleteCustomDishUser;
+        window.saveDishChanges = saveDishChanges;
+        window.deleteDish = deleteDish;
+        window.deleteCustomDish = deleteCustomDish;
+        window.saveCustomDishChanges = saveCustomDishChanges;
+        window.deleteUser = deleteUser;
+        window.moveUserUp = moveUserUp;
+        window.moveUserDown = moveUserDown;
+        window.closeCustomDishDialog = closeCustomDishDialog;
+    </script>
+</body>
+</html>
